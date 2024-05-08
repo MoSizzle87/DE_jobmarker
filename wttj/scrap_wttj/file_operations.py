@@ -7,6 +7,16 @@ import json
 import logging
 
 
+# Configuration du journal dans un fichier
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Configuration du journal pour afficher uniquement les erreurs dans la console
+console = logging.StreamHandler()
+console.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
+
 def save_file(file_to_save, output_name: str):
     current_directory = Path(__file__).resolve().parent.parent
     output_name = f"{output_name}.json"
@@ -18,12 +28,18 @@ def save_file(file_to_save, output_name: str):
         if not output_directory.exists():
             output_directory.mkdir(parents=True)
 
-        # Ouvre le fichier en mode écriture
-        with open(output_path, 'a', encoding='utf-8') as fichier:
-            # On utilise json.dump pour écrire les données dans le fichier JSON
-            json.dump(file_to_save, fichier, ensure_ascii=False)
-            fichier.write('\n')
+        # Si le fichier existe, lire son contenu et ajouter les nouvelles données à la liste existante
+        if output_path.exists():
+            with open(output_path, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+                existing_data.extend(file_to_save)
+        else:
+            existing_data = file_to_save
+
+        # Écrire la liste mise à jour dans le fichier JSON
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, ensure_ascii=False)
 
         logging.info(f"File saved to {output_path}")
     except Exception as e:
-        logging.info(f"An error occured during saving : {e}")
+        logging.error(f"An error occured during saving : {e}")

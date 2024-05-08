@@ -5,8 +5,15 @@ import logging
 from selectolax.parser import HTMLParser
 
 
-# Configuration des logs
-logging.basicConfig(level=logging.INFO)
+# Configuration du journal dans un fichier
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Configuration du journal pour afficher uniquement les erreurs dans la console
+console = logging.StreamHandler()
+console.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 async def extract_links(page, job_search_url: str, job_links_selector: str):
     """
@@ -17,10 +24,10 @@ async def extract_links(page, job_search_url: str, job_links_selector: str):
     :return: list of links
     """
     try:
-        await page.goto(job_search_url, timeout=5000)
+        await page.goto(job_search_url, timeout=15000)
 
         # Wait until the page has loaded the content with the total number of pages
-        await page.wait_for_selector(job_links_selector, timeout=5000)
+        await page.wait_for_selector(job_links_selector, timeout=15000)
 
         # Selection of all elements corresponding to the selector
         elements = await page.query_selector_all(job_links_selector)
