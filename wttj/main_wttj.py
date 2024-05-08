@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a', format
 # Configuration du journal pour afficher uniquement les erreurs dans la console
 console = logging.StreamHandler()
 console.setLevel(logging.WARNING)
-formatter = logging.Formatter('%(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
@@ -62,14 +62,15 @@ async def main():
                             job_offer = {}
 
                             # Add contract_data, company_data, skill_categories, raw_description as sub-dictionaries
+                            job_offer['source'] = "welcometothejungle"
+                            job_offer['job'] = job
                             job_offer['contract_data'] = await get_contract_elements(html, CONTRACT_INFO_SELECTOR,
                                                                                      CONTRACT_SELECTORS)
                             job_offer['company_data'] = await get_company_elements(html, COMPANY_INFO_SELECTOR,
                                                                                    COMPANY_SELECTORS)
-
                             job_offer['skill_categories'] = await get_job_skills(html, JOB_DESCRIPTION_SELECTOR,
                                                                                  SKILLS_DICT)
-
+                            job_offer['link'] = link
                             job_offer['raw_description'] = await get_raw_description(html, JOB_DESCRIPTION_SELECTOR)
 
                             all_job_offers.append(job_offer)
@@ -78,7 +79,7 @@ async def main():
                             save_file(all_job_offers, 'wttj_database_bronze')
 
         except Exception as e:
-            logging.error(f'Erreur inattendue : {e}')
+            logging.error(f'Unexpected error : {e}')
 
 
 if __name__ == "__main__":
