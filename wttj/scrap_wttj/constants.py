@@ -26,10 +26,10 @@ CONTRACT_INFO_SELECTOR = '[data-testid="job-metadata-block"]'
 COMPANY_INFO_SELECTOR = '.sc-bXCLTC.dBpdut'
 JOB_DESCRIPTION_SELECTOR = '[data-testid="job-section-description"]'
 CONTRACT_SELECTORS = {
-    'job_title': '.sc-bdOgaJ.kEoFYF',
+    'job_title': 'h2',
     'contract_type': '[name="contract"]',
     'salary': '[name="salary"]',
-    'company': '.sc-bdOgaJ.kaknoe',
+    'company': '.sc-bXCLTC.dPVkkc',
     'location': '[name="location"]',
     'remote': '[name="remote"]',
     'experience': '[name="suitcase"]',
@@ -47,7 +47,7 @@ COMPANY_SELECTORS = {
 }
 RAW_DESCRIPTION_SELECTORS = '.sc-bXCLTC.enCjpg'
 SKILLS_DICT = {
-    "programming_languages": [
+    "ProgLanguage": [
         "Python",
         "Java",
         "C++",
@@ -60,7 +60,7 @@ SKILLS_DICT = {
         "Kotlin",
         "Bash",
     ],
-    "databases": [
+    "DataBase": [
         "SQL",
         "NoSQL",
         "MongoDB",
@@ -69,9 +69,9 @@ SKILLS_DICT = {
         "HBase",
         "Elasticsearch",
     ],
-    "data_analyze": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
-    "big_data_tools": ["Hadoop", "Spark", "Databricks", "Flink", "Apache Airflow"],
-    "ML_and_data_mining": [
+    "Data Analytics": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
+    "BigData": ["Hadoop", "Spark", "Databricks", "Flink", "Apache Airflow"],
+    "MachineLearning": [
         "Scikit-Learn",
         "TensorFlow",
         "Keras",
@@ -81,20 +81,26 @@ SKILLS_DICT = {
         "CatBoost",
         "Orange",
     ],
-    "data_viz": [
+    "DataSerialization": [
+        "Avro",
+        "Protocol Buffers",
+        "Json",
+        "XML",
+    ],
+    "DataVisualisation": [
         "Tableau",
         "Power BI",
         "Matplotlib",
         "Seaborn",
         "Plotly",
     ],
-    "statistics": [
+    "Statistics": [
         "Statistiques Descriptives",
         "Inférentielles",
         "Bayesian Statistics",
         "Statistiques Bayésiennes",
     ],
-    "cloud_computing": [
+    "CloudComputing": [
         "AWS",
         "Azure",
         "Google Cloud Platform",
@@ -102,9 +108,9 @@ SKILLS_DICT = {
         "IBM Cloud",
         "Alibaba Cloud",
     ],
-    "dev_tools": ["Git", "Docker", "Jenkins", "Travis CI"],
+    "DevTools": ["Git", "Docker", "Jenkins", "Travis CI"],
     "OS": ["Linux", "Windows", "MacOS"],
-    "databases": [
+    "DBMS": [
         "MySQL",
         "PostgreSQL",
         "Oracle SQL",
@@ -114,19 +120,19 @@ SKILLS_DICT = {
         "Big Query",
         "SingleStore",
     ],
-    "big_data_and_processing": ["Apache Kafka", "Apache Flink", "HBase", "Cassandra"],
-    "automation_and_orchestration": [
+    "SoftBigDataProcessing": ["Apache Kafka", "Apache Flink", "HBase", "Cassandra"],
+    "Automation": [
         "Ansible",
         "Kubernetes",
         "Puppet",
         "Chef",
         "Airflow",
     ],
-    "IaC": ["Terraform", "CloudFormation"],
-    "security_and_network": ["VPN", "Firewall", "SSL/TLS", "Wireshark"],
-    "virtualization": ["VMware", "VirtualBox", "Hyper-V"],
-    "containers": ["Docker", "Kubernetes", "OpenShift"],
-    "collaboration": [
+    "InfrastructureAsCode": ["Terraform", "CloudFormation"],
+    "NetworkSecurty": ["VPN", "Firewall", "SSL/TLS", "Wireshark"],
+    "Virtualisation": ["VMware", "VirtualBox", "Hyper-V"],
+    "Containers": ["Docker", "Kubernetes", "OpenShift"],
+    "Collaboration": [
         "JIRA",
         "Confluence",
         "Slack",
@@ -134,7 +140,9 @@ SKILLS_DICT = {
         "Teams",
         "Discord",
     ],
-    "skills": [
+    "Other": [
+        "DevOps",
+        "Backend Development",
         "Big Data",
         "ML",
         "Machine Learning",
@@ -142,6 +150,11 @@ SKILLS_DICT = {
         "Cloud",
         "CI/CD",
         "CI / CD",
+    ],
+    "EnSoftSkils": [
+        "Communication", "Teamwork", "Time Management", "Adaptability", "Problem Solving", "Leadership", "Creativity",
+        "Empathy", "Collaboration", "Stress Management", "Organization", "Flexibility", "Initiative",
+        "Critical Thinking", "Interpersonal Skills"
     ],
 }
 # OUTPUT_DIR = '/Users/MoG/PycharmProjects/jobmarket/jobmarket'
