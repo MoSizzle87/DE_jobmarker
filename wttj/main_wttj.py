@@ -48,7 +48,7 @@ async def main():
                 browser = await p.chromium.launch()
 
                 for page_number in range(1, total_pages + 1):
-                    logging.warning(f"Collecting data for page {page_number}/{total_pages + 1} for {job} position")
+                    logging.warning(f"Collecting data for page {page_number}/{total_pages} for {job} position")
                     job_search_url = await generate_job_search_url(job, page_number)
                     page = await browser.new_page()
                     job_links = await extract_links(page, job_search_url, JOB_LINK_SELECTOR)
@@ -75,11 +75,11 @@ async def main():
 
                             all_job_offers.append(job_offer)
 
-                            # Save the output in a json file
-                            save_file(all_job_offers, 'wttj_database_bronze')
-
         except Exception as e:
             logging.error(f'Unexpected error : {e}')
+
+    # Save the output in a json file
+    save_file(all_job_offers, 'wttj_database_bronze')
 
 
 if __name__ == "__main__":

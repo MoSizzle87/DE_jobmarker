@@ -40,6 +40,6 @@ def save_file(file_to_save, output_name: str):
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False)
 
-        logging.info(f"File saved to {output_path}")
+        logging.warning(f"File saved to {output_path}")
     except Exception as e:
         logging.error(f"An error occured during saving : {e}")
