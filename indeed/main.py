@@ -23,7 +23,7 @@ COMPANY_INFORMATIONS_SELECTORS = {
     "company_industry": '[data-testid="companyInfo-industry"]',
 }
 SKILLS_DICT = {
-    "Langages de Programmation": [
+    "ProgLanguage": [
         "Python",
         "Java",
         "C++",
@@ -36,7 +36,7 @@ SKILLS_DICT = {
         "Kotlin",
         "Bash",
     ],
-    "Bases de Données": [
+    "DataBase": [
         "SQL",
         "NoSQL",
         "MongoDB",
@@ -45,9 +45,9 @@ SKILLS_DICT = {
         "HBase",
         "Elasticsearch",
     ],
-    "Analyse de Données": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
-    "Big Data": ["Hadoop", "Spark", "Databricks", "Flink", "Apache Airflow"],
-    "Machine Learning et Data Mining": [
+    "Data Analytics": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
+    "BigData": ["Hadoop", "Spark", "Databricks", "Flink", "Apache Airflow"],
+    "MachineLearning": [
         "Scikit-Learn",
         "TensorFlow",
         "Keras",
@@ -57,20 +57,26 @@ SKILLS_DICT = {
         "CatBoost",
         "Orange",
     ],
-    "Visualisation de Données": [
+    "DataSerialization": [
+        "Avro",
+        "Protocol Buffers",
+        "Json",
+        "XML",
+    ],
+    "DataVisualisation": [
         "Tableau",
         "Power BI",
         "Matplotlib",
         "Seaborn",
         "Plotly",
     ],
-    "Statistiques": [
+    "Statistics": [
         "Statistiques Descriptives",
         "Inférentielles",
         "Bayesian Statistics",
         "Statistiques Bayésiennes",
     ],
-    "Cloud Computing": [
+    "CloudComputing": [
         "AWS",
         "Azure",
         "Google Cloud Platform",
@@ -78,9 +84,9 @@ SKILLS_DICT = {
         "IBM Cloud",
         "Alibaba Cloud",
     ],
-    "Outils de Développement": ["Git", "Docker", "Jenkins", "Travis CI"],
-    "Systèmes d'Exploitation": ["Linux", "Windows", "MacOS"],
-    "Bases de Données": [
+    "DevTools": ["Git", "Docker", "Jenkins", "Travis CI"],
+    "OS": ["Linux", "Windows", "MacOS"],
+    "DBMS": [
         "MySQL",
         "PostgreSQL",
         "Oracle SQL",
@@ -90,19 +96,19 @@ SKILLS_DICT = {
         "Big Query",
         "SingleStore",
     ],
-    "Big Data et Processing": ["Apache Kafka", "Apache Flink", "HBase", "Cassandra"],
-    "Automatisation et Orchestration": [
+    "SoftBigDataProcessing": ["Apache Kafka", "Apache Flink", "HBase", "Cassandra"],
+    "Automation": [
         "Ansible",
         "Kubernetes",
         "Puppet",
         "Chef",
         "Airflow",
     ],
-    "Infrastructure as Code (IaC)": ["Terraform", "CloudFormation"],
-    "Sécurité et Réseau": ["VPN", "Firewall", "SSL/TLS", "Wireshark"],
+    "InfrastructureAsCode": ["Terraform", "CloudFormation"],
+    "NetworkSecurty": ["VPN", "Firewall", "SSL/TLS", "Wireshark"],
     "Virtualisation": ["VMware", "VirtualBox", "Hyper-V"],
     "Containers": ["Docker", "Kubernetes", "OpenShift"],
-    "Outils de Collaboration": [
+    "Collaboration": [
         "JIRA",
         "Confluence",
         "Slack",
@@ -110,7 +116,9 @@ SKILLS_DICT = {
         "Teams",
         "Discord",
     ],
-    "Compétences": [
+    "Other": [
+        "DevOps",
+        "Backend Development",
         "Big Data",
         "ML",
         "Machine Learning",
@@ -118,7 +126,11 @@ SKILLS_DICT = {
         "Cloud",
         "CI/CD",
         "CI / CD",
-        "CI-CD",
+    ],
+    "EnSoftSkils": [
+        "Communication", "Teamwork", "Time Management", "Adaptability", "Problem Solving", "Leadership", "Creativity",
+        "Empathy", "Collaboration", "Stress Management", "Organization", "Flexibility", "Initiative",
+        "Critical Thinking", "Interpersonal Skills"
     ],
 }
 JOB_DESCRIPTION_SELECTOR = '[id="jobDescriptionText"]'
@@ -394,20 +406,25 @@ async def main_batched(urls_batch, job_links_path, json_path):
 
 
 async def main():
-    json_path = Path("indeed_db_v4.json")
+    json_path = Path("indeed_db_v5.json")
     job_links_path = "job_links.txt"
 
-    with open(job_links_path, "r") as file:
-        all_urls = file.readlines()
+    while True:
 
-    batch_size = 100
+        with open(job_links_path, "r") as file:
+            all_urls = file.readlines()
 
-    while all_urls:
-        urls_batch = all_urls[:batch_size]
+        if not all_urls:
+            break
 
-        await main_batched(urls_batch, job_links_path, json_path)
+        batch_size = 100
 
-        all_urls = all_urls[batch_size:]
+        while all_urls:
+            urls_batch = all_urls[:batch_size]
+
+            await main_batched(urls_batch, job_links_path, json_path)
+
+            all_urls = all_urls[batch_size:]
 
 
 if __name__ == "__main__":

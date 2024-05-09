@@ -4,7 +4,6 @@ import re
 import logging
 import random
 import sys
-import csv
 from pathlib import Path
 
 ######################## CONSTANTS ########################
@@ -42,11 +41,9 @@ NEXT_PAGE_SELECTOR = '[data-testid="pagination-page-next"]'
 
 
 #################### Enregistrement csv #######################
-script_directory = Path(__file__).parent
-csv_filename = "job_links.csv"
+data_directory = Path.joinpath(Path(__file__).parent, "data")
 txt_filename = "job_links.txt"
-csv_path = script_directory / csv_filename
-txt_path = script_directory / txt_filename
+txt_path = Path.joinpath(data_directory, txt_filename)
 
 
 logging.basicConfig(
@@ -117,16 +114,14 @@ async def get_next_page_link(page, next_page_selector, job_position):
 
 
 # Function to save links to a file
-async def save_links_to_file(liste, file_path):
-    with open(file_path, "a", encoding="utf-8") as file:
-        for link in liste:
-            file.write(link + "\n")
+async def save_links_to_file(liste, directory, file_path):
+    if not data_directory.exists():
+        data_directory.mkdir(parents=True)
 
-async def save_links_to_csv(liste, file_path):
-    with open(file_path, "a", newline='', encoding="utf-8") as file:
-        writer = csv.writer(file)
-        for link in liste:
-            writer.writerow([link])
+    else :
+        with open(file_path, "a", encoding="utf-8") as file:
+            for link in liste:
+                file.write(link + "\n")
 
 
 
@@ -159,7 +154,7 @@ async def main():
 
                     if job_links is not None:
                         all_jobs_links.extend(job_links)
-                        await save_links_to_file(job_links, txt_path)
+                        await save_links_to_file(job_links, data_directory, txt_path)
                         logger.info(f"Saved links from page {base_url}")
                     else:
                         logger.warning(f"No links extracted from page {base_url}")
@@ -178,8 +173,6 @@ async def main():
                     await asyncio.sleep(random.uniform(0.5, 1))
                     await page.wait_for_load_state("networkidle")
                     logging.info(f"Following link found: {next_page_link}")
-
-        await save_links_to_csv(all_jobs_links, csv_path)
 
         await asyncio.sleep(2)
         await browser.close()
