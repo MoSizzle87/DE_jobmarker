@@ -1,5 +1,6 @@
 import time
 import subprocess
+from pathlib import Path
 
 
 def check_links(file):
@@ -14,7 +15,7 @@ def restart_supervisor_process():
 
 
 # Nom du fichier contenant les liens
-job_links = '/home/mosizzle/repositories/formation_project/DE_jobmarket/indeed/data/job_links.txt'
+job_links = Path.joinpath(Path(__file__).resolve().parent, "data", "job_links.txt")
 
 while check_links(job_links):
     print("Le fichier de liens n'est pas vide. Attente avant de vérifier à nouveau.")

@@ -406,8 +406,10 @@ async def main_batched(urls_batch, job_links_path, json_path):
 
 
 async def main():
-    json_path = Path("indeed_db_v5.json")
-    job_links_path = "job_links.txt"
+    directory = Path.joinpath(Path(__file__).resolve().parent, "data")
+    file_name = "indeed_db_v5.json"
+    json_path = Path.joinpath(directory, file_name)
+    job_links_path = Path.joinpath(directory, "job_links.txt")
 
     while True:
 
