@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import datetime
 
 # Add the path of the parent directory to sys.path using pathlib
 current_dir = Path(__file__).resolve().parent
@@ -63,23 +64,42 @@ async def main():
 
                             # Add contract_data, company_data, skill_categories, raw_description as sub-dictionaries
                             job_offer['source'] = "welcometothejungle"
-                            job_offer['job'] = job
-                            job_offer['contract_data'] = await get_contract_elements(html, CONTRACT_INFO_SELECTOR,
+
+                            contract_data = await get_contract_elements(html, CONTRACT_INFO_SELECTOR,
                                                                                      CONTRACT_SELECTORS)
+                            for key, value in contract_data.items():
+                                job_offer[key] = value
+
                             job_offer['company_data'] = await get_company_elements(html, COMPANY_INFO_SELECTOR,
                                                                                    COMPANY_SELECTORS)
-                            job_offer['skill_categories'] = await get_job_skills(html, JOB_DESCRIPTION_SELECTOR,
+
+                            job_offer['skills'] = await get_job_skills(html, JOB_DESCRIPTION_SELECTOR,
                                                                                  SKILLS_DICT)
+
                             job_offer['link'] = link
-                            job_offer['raw_description'] = await get_raw_description(html, JOB_DESCRIPTION_SELECTOR)
+
+                            job_offer['description'] = await get_raw_description(html, JOB_DESCRIPTION_SELECTOR)
 
                             all_job_offers.append(job_offer)
 
         except Exception as e:
             logging.error(f'Unexpected error : {e}')
 
-    # Save the output in a json file
-    save_file(all_job_offers, 'wttj_database_bronze')
+    # Remove duplicate dictionaries from all_job_offers
+    unique_job_offers = []
+    seen_job_offers = set()
+    for job_offer in all_job_offers:
+        job_offer_tuple = tuple(sorted(job_offer.items()))  # Convert the dictionary to a tuple of sorted items
+        if job_offer_tuple not in seen_job_offers:
+            unique_job_offers.append(job_offer)
+            seen_job_offers.add(job_offer_tuple)
+
+    all_job_offers = unique_job_offers  # Replace all_job_offers with the unique list
+
+    # Get the week number
+    week_number = datetime.datetime.now().isocalendar()[1]
+    # Save the output in a json file with the week number in the name
+    save_file(all_job_offers, f'wttj_database_{week_number}.json')
 
 
 if __name__ == "__main__":
