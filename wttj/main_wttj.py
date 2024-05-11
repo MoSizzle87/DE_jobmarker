@@ -76,7 +76,7 @@ async def main():
                             job_offer['skills'] = await get_job_skills(html, JOB_DESCRIPTION_SELECTOR,
                                                                                  SKILLS_DICT)
 
-                            job_offer['link'] = link
+                            job_offer['link'] = complete_url
 
                             job_offer['description'] = await get_raw_description(html, JOB_DESCRIPTION_SELECTOR)
 
