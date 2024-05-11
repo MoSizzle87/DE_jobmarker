@@ -1,33 +1,6 @@
 import json
 from pathlib import Path
 
-
-# Définition des correspondances entre les anciennes et les nouvelles clés
-renaming_map = {
-    "job_title": "title",
-    "job_location": "location",
-    "company_turnover": "turnover_in_millions",
-    "company_industry": "sector",
-    "Langages de Programmation": "ProgLanguage",
-    "Bases de Données": "DataBase",
-    "Analyse de Données": "DataAnalytics",
-    "Big Data": "BigData",
-    "Machine Learning et Data Mining": "MachineLearning",
-    "Visualisation de Données": "DataVisualisation",
-    "Statistiques": "Statistics",
-    "Cloud Computing": "CloudComputing",
-    "Outils de Développement": "DevTools",
-    "Systèmes d'Exploitation": "OS",
-    "Big Data et Processing": "SoftBigDataProcessing",
-    "Automatisation et Orchestration": "Automation",
-    "Infrastructure as Code (IaC)": "InfrastructureAsCode",
-    "Sécurité et Réseau": "NetworkSecurty",
-    "Outils de Collaboration": "Collaboration",
-    "Compétences": "Other",
-    "raw_description": "description"
-}
-
-
 current_path = Path(__file__).resolve().parent
 doc_path = Path.joinpath(current_path, "old_databases", "indeed_final_db_bronze_v4.json")
 
@@ -40,23 +13,48 @@ with open(doc_path, 'r', encoding='utf-8') as f:
         # Charger l'objet JSON de la ligne courante
         obj = json.loads(line)
 
-        # Ajouter la variable source avec la valeur "Indeed"
-        obj["source"] = "Indeed"
+        # Créer une nouvelle structure de dictionnaire avec les variables renommées
+        new_obj = {
+            "source": "Indeed",
+            "company_data": {
+                "sector": obj.get("company_industry"),
+                "company_size": obj.get("company_size"),  # Ajoutez les valeurs appropriées ici
+                "turnover_in_millions": obj.get("company_turnover")
+            },
+            "skills": {
+                "ProgLanguage": obj.get("Langages de Programmation"),
+                "DataBase": obj.get("Bases de Données"),
+                "Data Analytics": obj.get("Analyse de Données"),
+                "BigData": obj.get("Big Data"),
+                "MachineLearning": obj.get("Machine Learning et Data Mining"),
+                "DataVisualisation": obj.get("Visualisation de Données"),
+                "Statistics": obj.get("Statistiques"),
+                "CloudComputing": obj.get("Cloud Computing"),
+                "DevTools": obj.get("Outils de Développement"),
+                "OS": obj.get("Systèmes d'Exploitation"),
+                "SoftBigDataProcessing": obj.get("Big Data et Processing"),
+                "Automation": obj.get("Automatisation et Orchestration"),
+                "InfrastructureAsCode": obj.get("Infrastructure as Code (IaC)"),
+                "NetworkSecurty": obj.get("Sécurité et Réseau"),
+                "Virtualisation": obj.get("Virtualisation"),  # Ajoutez les valeurs appropriées ici
+                "Containers": obj.get("Containers"),  # Ajoutez les valeurs appropriées ici
+                "Collaboration": obj.get("Outils de Collaboration"),
+                "Other": obj.get("Compétences")
+            },
+            "contract_type": obj.get("contract_type"),  # Ajoutez les valeurs appropriées ici
+            "salary": obj.get("salary"),  # Ajoutez les valeurs appropriées ici
+            "company": obj.get("company"),  # Ajoutez les valeurs appropriées ici
+            "location": obj.get("job_location"),
+            "remote": obj.get("remote"),  # Ajoutez les valeurs appropriées ici
+            "title": obj.get("job_title"),
+            "description": obj.get("raw_description")
+        }
 
-        # Renommer chaque clé selon la correspondance
-        for old_key, new_key in renaming_map.items():
-            if old_key in obj:
-                obj[new_key] = obj.pop(old_key)
+        # Ajouter le nouveau dictionnaire à la liste
+        data.append(new_obj)
 
-        # Ajouter l'objet JSON à la liste
-        data.append(obj)
-
-output_doc = Path.joinpath(current_path, "data", "indeed_silver.json")
+output_doc = Path.joinpath(current_path, "data", "indeed_gold.json")
 # Sauvegarder les modifications dans un nouveau fichier JSON
 with open(output_doc, 'w', encoding='utf-8') as f:
-    # Écrire chaque objet JSON dans le fichier, séparé par une virgule et une nouvelle ligne
-    for i, obj in enumerate(data):
-        json.dump(obj, f, ensure_ascii=False)
-        # Ajouter une virgule après chaque objet sauf le dernier
-        if i < len(data) - 1:
-            f.write(',\n')
+    # Écrire la liste de dictionnaires dans le fichier JSON
+    json.dump(data, f, ensure_ascii=False, indent=4)
