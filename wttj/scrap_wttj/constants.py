@@ -69,7 +69,7 @@ SKILLS_DICT = {
         "HBase",
         "Elasticsearch",
     ],
-    "Data Analytics": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
+    "DataAnalytics": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
     "BigData": ["Hadoop", "Spark", "Databricks", "Flink", "Apache Airflow"],
     "MachineLearning": [
         "Scikit-Learn",

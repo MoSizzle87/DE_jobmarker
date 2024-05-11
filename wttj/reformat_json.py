@@ -35,6 +35,10 @@ for entry in data:
     if 'link' in entry:
         entry['link'] = 'https://www.welcometothejungle.com' + entry['link']
 
+    # 7 - Renommer 'Data Analytics' en 'DataAnalytics' dans 'skills'
+    if 'skills' in entry and 'Data Analytics' in entry['skills']:
+        entry['skills']['DataAnalytics'] = entry['skills'].pop('Data Analytics')
+
 output_doc = Path.joinpath(current_path, "data", "wttj_database_silver.json")
 # Sauvegarder les modifications dans un nouveau fichier JSON
 with open(output_doc, 'w', encoding='utf-8') as f:
