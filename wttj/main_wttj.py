@@ -13,6 +13,7 @@ from scrap_wttj.data_extraction import extract_links, get_contract_elements, get
 from scrap_wttj.pagination_functions import get_total_pages, get_html
 from scrap_wttj.file_operations import save_file
 
+
 # Setup logging
 current_dir = Path(__file__).resolve().parent
 logging.basicConfig(level=logging.INFO, filename=f'{current_dir}/app.log', filemode='a',
