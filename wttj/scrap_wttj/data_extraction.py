@@ -2,11 +2,10 @@
 This module groups together all the functions needed to obtain information from web pages.
 """
 import logging
-from selectolax.parser import HTMLParser
-
 
 # Configuration du journal dans un fichier
-logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='wttj/app.log', filemode='a',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configuration du journal pour afficher uniquement les erreurs dans la console
 console = logging.StreamHandler()
@@ -14,6 +13,7 @@ console.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(levelname)s - %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
+
 
 async def extract_links(page, job_search_url: str, job_links_selector: str):
     """
@@ -140,8 +140,6 @@ async def get_company_elements(html, company_info_selector, COMPANY_SELECTORS):
 
 
 async def get_job_skills(html, job_description_selector, job_info_dict):
-
-
     try:
         # Utiliser html.css_first() pour extraire le contenu du sélecteur CSS
         job_description_element = html.css_first(job_description_selector)

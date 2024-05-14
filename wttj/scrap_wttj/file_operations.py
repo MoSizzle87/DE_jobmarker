@@ -6,9 +6,9 @@ from pathlib import Path
 import json
 import logging
 
-
 # Configuration du journal dans un fichier
-logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='wttj/app.log', filemode='a',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configuration du journal pour afficher uniquement les erreurs dans la console
 console = logging.StreamHandler()
@@ -16,6 +16,7 @@ console.setLevel(logging.ERROR)
 formatter = logging.Formatter('%(levelname)s - %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
+
 
 def save_file(file_to_save, output_name: str):
     current_directory = Path(__file__).resolve().parent.parent

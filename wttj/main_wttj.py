@@ -1,11 +1,5 @@
-import sys
 from pathlib import Path
 import datetime
-
-# Add the path of the parent directory to sys.path using pathlib
-current_dir = Path(__file__).resolve().parent
-sys.path.append(str(current_dir))
-
 import logging
 import sys
 import asyncio
@@ -19,7 +13,6 @@ from scrap_wttj.data_extraction import extract_links, get_contract_elements, get
 from scrap_wttj.pagination_functions import get_total_pages, get_html
 from scrap_wttj.file_operations import save_file
 
-
 # Setup logging
 current_dir = Path(__file__).resolve().parent
 logging.basicConfig(level=logging.INFO, filename=f'{current_dir}/app.log', filemode='a',
@@ -29,6 +22,7 @@ console.setLevel(logging.WARNING)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
+
 
 async def generate_job_search_url(job, page_number):
     return f"https://www.welcometothejungle.com/fr/jobs?query={job.replace(' ', '%20')}&page={page_number}&aroundQuery=worldwide"
@@ -52,10 +46,28 @@ async def scrape_job_offers(browser, job, page_number):
                 'description': await get_raw_description(html, JOB_DESCRIPTION_SELECTOR)
             }
             job_offers.append(job_offer)
-            print(job_offer)
 
     await page.close()  # Fermer la page après avoir terminé
     return job_offers
+
+
+def make_hashable(data):
+    """
+    Recursively convert a complex data structure into an immutable form that can be used as a set element.
+
+    Args:
+    data (any): The data to convert to an immutable form. Can be a list, dict, or basic data type.
+
+    Returns:
+    tuple: An immutable representation of the input data.
+    """
+    if isinstance(data, dict):
+        return tuple((key, make_hashable(value)) for key, value in sorted(data.items()))
+    elif isinstance(data, list):
+        return tuple(make_hashable(item) for item in data)
+    else:
+        return data
+
 
 async def main():
     unique_job_offers = []
@@ -70,15 +82,16 @@ async def main():
             for page_number in range(1, total_pages + 1):
                 job_offers = await scrape_job_offers(browser, job, page_number)
                 for job_offer in job_offers:
-                    job_offer_tuple = tuple(sorted(job_offer.items()))
-                    if job_offer_tuple not in seen_job_offers:
+                    hashable_job_offer = make_hashable(job_offer)
+                    if hashable_job_offer not in seen_job_offers:
                         unique_job_offers.append(job_offer)
-                        seen_job_offers.add(job_offer_tuple)
+                        seen_job_offers.add(hashable_job_offer)
 
         await browser.close()  # Fermer le navigateur après avoir terminé
 
     week_number = datetime.datetime.now().isocalendar()[1]
     save_file(unique_job_offers, f'wttj_database_{week_number}.json')
+
 
 if __name__ == "__main__":
     asyncio.run(main())
