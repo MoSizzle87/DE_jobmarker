@@ -16,6 +16,7 @@ playwright = "^1.43.0"
 aiofiles = "^23.2.1"
 jupyter = "^1.0.0"
 pandas = "^2.2.2"
+elasticsearch = "^8.13.2"
 
 
 [build-system]
