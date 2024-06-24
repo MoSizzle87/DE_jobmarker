@@ -1,14 +1,17 @@
-'''
+"""
 This module contains all the functions needed to manage pagination and retrieve pages from html code.
-'''
-import validators
-from fake_useragent import UserAgent
-import httpx
-from selectolax.parser import HTMLParser
-from playwright.async_api import async_playwright
+"""
+
 import logging
 
-logger = logging.getLogger('scrap_wttj.pagination_functions')
+import httpx
+import validators
+from fake_useragent import UserAgent
+from playwright.async_api import async_playwright
+from selectolax.parser import HTMLParser
+
+logger = logging.getLogger("scrap_wttj.pagination_functions")
+
 
 async def get_html(url: str):
     """
@@ -17,11 +20,12 @@ async def get_html(url: str):
     :param url: url of the page we want to scrape (job details pages)
     """
     user_agent = UserAgent().random  # Generate a random User-Agent for each call
-    headers = {'User-Agent': user_agent}
+    headers = {"User-Agent": user_agent}
 
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
             html = HTMLParser(resp.text)
         except httpx.HTTPError as e:
             logging.error(f"HTTP error while fetching {url}: {e}")
@@ -50,6 +54,7 @@ async def get_total_pages(baseurl: str, total_page_selector: str):
             page = await browser.new_page()
             try:
                 await page.goto(baseurl, timeout=5000)
+                await page.wait_for_load_state("networkidle")
 
                 # Wait until the page has loaded the content with the total number of pages
                 await page.wait_for_selector(total_page_selector, timeout=5000)

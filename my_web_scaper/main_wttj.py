@@ -15,8 +15,8 @@ from scrap_wttj.constants import (
     JOB_LINK_SELECTOR,
     JOBS,
     RACINE_URL,
+    RAW_DESCRIPTION_SELECTORS,
     TOTAL_PAGE_SELECTOR,
-    RAW_DESCRIPTION_SELECTORS
 )
 from scrap_wttj.data_extraction import (
     extract_links,
@@ -83,13 +83,18 @@ async def generate_job_search_url(job, page_number):
     return url
 
 
-async def scrape_job_offers(page, job, page_number, intermediate_file):
+async def scrape_job_offers(page, job, page_number, final_file):
     job_search_url = await generate_job_search_url(job, page_number)
     logging.info(f"Scraping URL: {job_search_url}")
     try:
         await page.goto(job_search_url)
         job_links = await extract_links(page, job_search_url, JOB_LINK_SELECTOR)
         logging.info(f"Extracted job links: {job_links}")
+
+        if not job_links:
+            logging.warning(f"No job links found for URL: {job_search_url}")
+            return []
+
         job_offers = []
 
         for link in job_links:
@@ -117,10 +122,9 @@ async def scrape_job_offers(page, job, page_number, intermediate_file):
                     }
                     job_offers.append(job_offer)
 
-                    # Save each job offer immediately to the intermediate file
-                    with open(intermediate_file, "a", encoding="utf-8") as f:
-                        f.write(json.dumps(job_offer) + "\n")
-                    logging.info(f"Successfully wrote job offer to {intermediate_file}")
+                    # Append each job offer to the JSON list in the final file
+                    append_to_json_list(final_file, job_offer)
+                    logging.info(f"Successfully wrote job offer to {final_file}")
                 else:
                     logging.error(f"Failed to fetch HTML from {complete_url}, got None")
 
@@ -136,28 +140,27 @@ async def scrape_job_offers(page, job, page_number, intermediate_file):
         return []
 
 
-def make_hashable(data):
-    if isinstance(data, dict):
-        return tuple((key, make_hashable(value)) for key, value in sorted(data.items()))
-    elif isinstance(data, list):
-        return tuple(make_hashable(item) for item in data)
-    else:
-        return data
-
-
-def read_intermediate_file(intermediate_file):
-    unique_job_offers = []
-    seen_job_offers = set()
-
-    if intermediate_file.exists():
-        with open(intermediate_file, "r", encoding="utf-8") as f:
-            for line in f:
-                job_offer = json.loads(line.strip())
-                hashable_job_offer = make_hashable(job_offer)
-                if hashable_job_offer not in seen_job_offers:
-                    unique_job_offers.append(job_offer)
-                    seen_job_offers.add(hashable_job_offer)
-    return unique_job_offers, seen_job_offers
+def append_to_json_list(file_path, item):
+    try:
+        if (
+            file_path.exists() and file_path.stat().st_size > 2
+        ):  # If the file is not empty and not just '[]'
+            with open(file_path, "r+", encoding="utf-8") as f:
+                f.seek(0, 2)  # Go to the end of the file
+                f.seek(
+                    f.tell() - 1, 0
+                )  # Move back one character (to before the last ])
+                f.truncate()  # Remove the last character
+                f.write(
+                    ",\n"
+                )  # Add a comma (to separate this from the previous dict) and a newline
+                json.dump(item, f)  # Dump the new dictionary
+                f.write("]")  # Close the list
+        else:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump([item], f)  # Create a new list with the first item
+    except Exception as e:
+        logging.error(f"Error while appending to JSON list: {e}")
 
 
 async def launch_browser():
@@ -171,31 +174,25 @@ async def close_browser(browser, playwright):
     await playwright.stop()
 
 
-async def scrape_jobs(page, intermediate_file, unique_job_offers, seen_job_offers):
+async def scrape_jobs(page, final_file):
     for job in JOBS:
         baseurl = await generate_job_search_url(job, 1)
         total_pages = await get_total_pages(baseurl, TOTAL_PAGE_SELECTOR)
         for page_number in range(1, total_pages + 1):
-            job_offers = await scrape_job_offers(
-                page, job, page_number, intermediate_file
-            )
-            for job_offer in job_offers:
-                hashable_job_offer = make_hashable(job_offer)
-                if hashable_job_offer not in seen_job_offers:
-                    unique_job_offers.append(job_offer)
-                    seen_job_offers.add(hashable_job_offer)
-    return unique_job_offers
+            await scrape_job_offers(page, job, page_number, final_file)
 
 
 async def main():
     logger = logging.getLogger(__name__)
 
-    # Determine the week number and intermediate file name
+    # Determine the week number and final file name
     week_number = datetime.datetime.now().isocalendar()[1]
-    intermediate_file = data_dir / f"intermediate_job_offers_{week_number}.json"
+    final_file = data_dir / f"wttj_database_{week_number}.json"
 
-    # Read intermediate job offers if the file exists
-    unique_job_offers, seen_job_offers = read_intermediate_file(intermediate_file)
+    # Initialize final file with an empty list if it doesn't exist
+    if not final_file.exists():
+        with open(final_file, "w", encoding="utf-8") as f:
+            f.write("[]")  # Initialize with empty list
 
     # Launch browser
     browser, playwright = await launch_browser()
@@ -203,16 +200,10 @@ async def main():
 
     try:
         # Scrape jobs
-        unique_job_offers = await scrape_jobs(
-            page, intermediate_file, unique_job_offers, seen_job_offers
-        )
+        await scrape_jobs(page, final_file)
     finally:
         # Ensure browser is closed
         await close_browser(browser, playwright)
-
-    # Save all unique job offers at once to the final JSON file
-    final_file = data_dir / f"wttj_database_{week_number}.json"
-    save_file(unique_job_offers, final_file)
 
 
 if __name__ == "__main__":

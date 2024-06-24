@@ -20,7 +20,7 @@ JOBS = ["data engineer",
         "Data Pipeline Engineer",
         "ETL Developer"]
 RACINE_URL = 'https://www.welcometothejungle.com'
-JOB_LINK_SELECTOR = 'div.sc-1gjh7r6-7.fCBkLE a'
+JOB_LINK_SELECTOR = 'div.sc-1gjh7r6-7.fCBkLE > a'
 TOTAL_PAGE_SELECTOR = '[aria-label="Pagination"]'
 CONTRACT_INFO_SELECTOR = '[data-testid="job-metadata-block"]'
 COMPANY_INFO_SELECTOR = '.sc-bXCLTC.dBpdut'

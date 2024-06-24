@@ -1,3 +1,9 @@
+from pathlib import Path
+import json
+import re
+import datetime
+
+# Votre dictionnaire de compétences
 skills = {
     "ProgLanguage": [
         "Python",
@@ -5,9 +11,7 @@ skills = {
         "C++",
         "C#",
         "Scala",
-        " R,",
-        "/R/",
-        " R ",
+        "R",
         "Julia",
         "Kotlin",
         "Bash",
@@ -21,8 +25,19 @@ skills = {
         "HBase",
         "Elasticsearch",
     ],
-    "DataAnalytics": ["Pandas", "NumPy", " R,", "/R/", " R ", "MATLAB"],
-    "BigData": ["Hadoop", "Spark", "Databricks", "Flink", "Apache Airflow"],
+    "DataAnalytics": [
+        "Pandas",
+        "NumPy",
+        "R",
+        "MATLAB",
+    ],
+    "BigData": [
+        "Hadoop",
+        "Spark",
+        "Databricks",
+        "Flink",
+        "Apache Airflow",
+    ],
     "MachineLearning": [
         "Scikit-Learn",
         "TensorFlow",
@@ -121,3 +136,42 @@ skills = {
         "Interpersonal Skills",
     ],
 }
+
+
+# Fonction pour vérifier la présence de mots en entier et insensible à la casse
+def find_skills(description, skills):
+    found_skills = {}
+    description = description.lower()
+    for category, keywords in skills.items():
+        found_keywords = set()  # Utiliser un set pour supprimer les doublons
+        for keyword in keywords:
+            # Utilisation de regex pour trouver des mots complets, insensible à la casse
+            pattern = re.compile(r"\b" + re.escape(keyword.lower().strip()) + r"\b")
+            if pattern.search(description):
+                found_keywords.add(keyword)
+        if found_keywords:
+            found_skills[category] = list(found_keywords)  # Convertir le set en liste
+    return found_skills
+
+
+# Chemin vers le fichier JSON existant
+data_dir = Path(__file__).resolve().parent / "data"
+week_number = datetime.datetime.now().isocalendar()[1]
+file_path = data_dir / f"wttj_database_{week_number}.json"
+
+# Charger le fichier JSON
+with open(file_path, "r", encoding="utf-8") as file:
+    data = json.load(file)
+
+# Parcourir les descriptions et trouver les compétences
+for item in data:
+    if "description" in item:
+        item_description = item["description"]
+        skills_found = find_skills(item_description, skills)
+        item["skills"] = skills_found  # Ajouter les compétences trouvées à l'élément
+
+# Écraser les données enrichies dans le fichier JSON existant
+with open(file_path, "w", encoding="utf-8") as file:
+    json.dump(data, file, ensure_ascii=False, indent=4)
+
+print(f"Les données enrichies ont été enregistrées dans {file_path}")

@@ -19,6 +19,7 @@ async def extract_links(page, job_search_url: str, job_links_selector: str):
     """
     try:
         await page.goto(job_search_url, timeout=15000)
+        await page.wait_for_load_state("networkidle")
         logging.info(f"Navigated to {job_search_url}")
 
         await page.wait_for_selector(job_links_selector, timeout=15000)
