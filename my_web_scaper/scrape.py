@@ -178,6 +178,9 @@ async def scrape_jobs(page, final_file):
     for job in JOBS:
         baseurl = await generate_job_search_url(job, 1)
         total_pages = await get_total_pages(baseurl, TOTAL_PAGE_SELECTOR)
+        if total_pages is None:
+            logging.error(f"Could not determine total pages for job: {job}")
+            continue
         for page_number in range(1, total_pages + 1):
             await scrape_job_offers(page, job, page_number, final_file)
 
