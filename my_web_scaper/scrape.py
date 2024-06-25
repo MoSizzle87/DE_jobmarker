@@ -76,6 +76,20 @@ logging_config = {
 # Apply logging configuration
 logging.config.dictConfig(logging_config)
 
+checkpoint_file = data_dir / "checkpoint.json"
+
+
+def save_checkpoint(job, page_number):
+    with open(checkpoint_file, "w") as f:
+        json.dump({"job": job, "page_number": page_number}, f)
+
+
+def load_checkpoint():
+    if checkpoint_file.exists():
+        with open(checkpoint_file, "r") as f:
+            return json.load(f)
+    return None
+
 
 async def generate_job_search_url(job, page_number):
     url = f"https://www.welcometothejungle.com/fr/jobs?query={job.replace(' ', '%20')}&page={page_number}&aroundQuery=worldwide"
@@ -87,7 +101,8 @@ async def scrape_job_offers(page, job, page_number, final_file):
     job_search_url = await generate_job_search_url(job, page_number)
     logging.info(f"Scraping URL: {job_search_url}")
     try:
-        await page.goto(job_search_url)
+        await page.goto(job_search_url, timeout=30000)
+        await page.wait_for_load_state("networkidle")
         job_links = await extract_links(page, job_search_url, JOB_LINK_SELECTOR)
         logging.info(f"Extracted job links: {job_links}")
 
@@ -175,14 +190,25 @@ async def close_browser(browser, playwright):
 
 
 async def scrape_jobs(page, final_file):
-    for job in JOBS:
+    checkpoint = load_checkpoint()
+    if checkpoint:
+        start_job = checkpoint["job"]
+        start_page = checkpoint["page_number"]
+        start_index = JOBS.index(start_job)
+    else:
+        start_index = 0
+        start_page = 1
+
+    for job in JOBS[start_index:]:
         baseurl = await generate_job_search_url(job, 1)
         total_pages = await get_total_pages(baseurl, TOTAL_PAGE_SELECTOR)
         if total_pages is None:
             logging.error(f"Could not determine total pages for job: {job}")
             continue
-        for page_number in range(1, total_pages + 1):
+        for page_number in range(start_page, total_pages + 1):
             await scrape_job_offers(page, job, page_number, final_file)
+            save_checkpoint(job, page_number)
+        start_page = 1  # Reset page number after the first job
 
 
 async def main():
